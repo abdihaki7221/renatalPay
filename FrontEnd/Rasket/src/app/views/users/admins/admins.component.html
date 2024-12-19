@@ -1,0 +1,214 @@
+
+<div class="row">
+
+  <div class="column-xl-10">
+      <div class="card">
+          <div class="card-body">
+            
+    
+            
+            <div class="py-3">
+              <form>
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                  <!-- Search Input -->
+                  <div class="d-flex align-items-center me-2">
+                    <label for="table-complete-search" class="me-2 col-form-label">Search:</label>
+                    <input
+                      id="table-complete-search"
+                      type="text"
+                      class="form-control"
+                      name="searchTerm"
+                      [(ngModel)]="tableService.searchTerm"
+                    />
+                    <!-- Loading indicator -->
+                    <span *ngIf="tableService.loading$ | async" class="ms-2 col-form-label">Loading...</span>
+                  </div>
+    
+                
+                    <ul class="nav nav-pills" ngbNav>
+                      <li class="nav-item" ngbNavItem>
+                        <a ngbNavLink (click)="setDateFilter('today')">Today</a>
+                        <ng-template ngbNavContent>
+                          <div>Showing results for today.</div>
+                        </ng-template>
+                      </li>
+                      <li class="nav-item" ngbNavItem>
+                        <a ngbNavLink (click)="setDateFilter('thisWeek')">This Week</a>
+                        <ng-template ngbNavContent>
+                          <div>Showing results for this week.</div>
+                        </ng-template>
+                      </li>
+                      <li class="nav-item" ngbNavItem>
+                        <a ngbNavLink (click)="setDateFilter('thisMonth')">This Month</a>
+                        <ng-template ngbNavContent>
+                          <div>Showing results for this month.</div>
+                        </ng-template>
+                      </li>
+                      <li class="nav-item" ngbNavItem>
+                        <a ngbNavLink (click)="setDateFilter('custom')">Custom Range</a>
+                        <ng-template ngbNavContent>
+                          <div>Select a custom date range.</div>
+                        </ng-template>
+                      </li>
+                    </ul>
+                
+                  
+                  
+    
+                  <!-- Dropdown Button (Aligned to the Far End) -->
+                  <div class="dropdown" ngbDropdown>
+                    <button class="btn btn-danger dropdown-toggle" ngbDropdownToggle type="button">
+                      Export
+                    </button>
+                    <ul class="dropdown-menu" ngbDropdownMenu>
+                      <li><a class="dropdown-item" href="javascript:void(0);">Pdf</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0);">Excel</a></li>
+                    </ul>
+                  </div>
+                </div>
+                
+    
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th
+                      scope="col"
+                      sortable="date"
+                      (sort)="onCompleteSort($event)"
+                    >
+                    Date
+                    </th>
+                    <th
+                    scope="col"
+                    sortable="transactionId"
+                    (sort)="onCompleteSort($event)"
+                  >
+                    Transaction Id
+                  </th>
+                  <th
+                      scope="col"
+                      sortable="payment"
+                      (sort)="onCompleteSort($event)"
+                    >
+                    Payment
+                    </th>
+                      <th
+                        scope="col"
+                        sortable="name"
+                        (sort)="onCompleteSort($event)"
+                      >
+                        Tenant Name
+                      </th>
+                      <th
+                        scope="col"
+                        sortable="amount"
+                        (sort)="onCompleteSort($event)"
+                      >
+                        Amount
+                      </th>
+                      
+                      <th
+                      scope="col"
+                      sortable="tenantId"
+                      (sort)="onCompleteSort($event)"
+                    >
+                      Tenant Id
+                    </th>
+                    <th
+                        scope="col"
+                        
+                      >
+                        View
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let country of records$ | async; trackBy: trackById">
+                      <th scope="row">{{ country.id }}</th>
+                      <td>
+                        <ngb-highlight
+                          [result]="country.date | date"
+                          [term]="tableService.searchTerm"
+                        ></ngb-highlight>
+                      </td>
+                      <td>
+                        <ngb-highlight
+                          [result]="country.transactionId"
+                          [term]="tableService.searchTerm"
+                        ></ngb-highlight>
+                      </td>
+                      <td>
+                        <span
+                          class="badge me-1"
+                          [ngClass]="{
+                            'bg-success': country.payment === 'MPESA',
+                            'bg-primary': country.payment === 'CARD'
+                          }"
+                        >
+                          <ngb-highlight
+                            [result]="country.payment"
+                            [term]="tableService.searchTerm"
+                          ></ngb-highlight>
+                        </span>
+                      </td>
+                      
+                        
+                      <td>
+                        <ngb-highlight
+                          [result]="country.name"
+                          [term]="tableService.searchTerm"
+                        ></ngb-highlight>
+                      </td>
+                      <td>
+                        <ngb-highlight
+                          [result]="country.amount | number"
+                          [term]="tableService.searchTerm"
+                        ></ngb-highlight>
+                      </td>
+                      
+                      <td>
+                        <ngb-highlight
+                          [result]="country.tenantId"
+                          [term]="tableService.searchTerm"
+                        ></ngb-highlight>
+                      </td>
+
+                      <td>
+                        <i class="bx bx-show" style="cursor: pointer;" (click)="viewDetails(country)"></i>
+                     </td>
+                    </tr>
+                    <tr *ngIf="(records$ | async)?.length === 0">
+                      <td colspan="6" style="text-align: center">
+                        No Tenants found
+                      </td>
+                    </tr>
+                  </tbody>
+                  
+                </table>
+    
+                <div class="d-flex justify-content-between p-2">
+                  <ngb-pagination
+                    [collectionSize]="(total$ | async)!"
+                    [(page)]="tableService.page"
+                    [pageSize]="tableService.pageSize"
+                  >
+                  </ngb-pagination>
+    
+                  <select
+class="form-select"
+style="width: auto"
+name="paymentFilter"
+>
+<option [ngValue]="'all'">All Payments</option>
+<option [ngValue]="'MPESA'">MPESA</option>
+<option [ngValue]="'CARD'">CARD</option>
+</select>
+
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+  </div>
+</div>
